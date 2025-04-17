@@ -1,2 +1,0 @@
-# go-pet
-go-pet
