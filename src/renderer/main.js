@@ -8,6 +8,7 @@ import 'element-plus/dist/index.css'
 //import App from '@renderer/components/pet/pet.vue'
 //import App from '@renderer/App.vue'
 import App from '@renderer/views/mainpage/mainpage.vue'
+//import App from '@renderer/components/function/fun3/character/character.vue'
 import router from './router'
 
 
