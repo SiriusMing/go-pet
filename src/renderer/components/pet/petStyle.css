@@ -10,9 +10,9 @@
   font-family: 'Press Start 2P', monospace;
 }
 
-/* 宠物图 */
+/* 图 */
 .pet-img {
-  width: 120px;
+  width: 160px;
   transition: transform .2s;
 }
 .pet-img:hover {
@@ -24,7 +24,7 @@
   position: fixed;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   width: 80px;
 }
 .ctrl-col.left .circle,

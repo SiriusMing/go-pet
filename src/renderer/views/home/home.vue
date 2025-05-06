@@ -1,20 +1,25 @@
 <template>
   <div
-    class="pet-wrapper"
-    :style="{ left: x + 'px', top: y + 'px' }"
-    @mouseenter="showControls"
-    @mouseleave="scheduleHide"
-  >
-    <!-- Pet Image -->
-    <img
-      ref="imgEl"
-      class="pet-img"
-      :src="petSrc"
-      alt="pet"
-      @load="updateImgSize"
-      @mousedown.prevent="startDrag"
-      :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
-    />
+  class="pet-wrapper"
+  :style="{ left: x + 'px', top: y + 'px' }"
+  @mouseenter="showControls"
+  @mouseleave="scheduleHide"
+>
+  <!-- Pet Image -->
+  <img
+    ref="imgEl"
+    class="pet-img"
+    :src="petSrc"
+    alt="pet"
+    @load="updateImgSize"
+    @mousedown.prevent="startDrag"
+    :style="{
+      width:  imgW  + 'px',
+      height: imgH  + 'px',
+      cursor: isDragging ? 'grabbing' : 'grab'
+    }"
+  />
+</div>
 
     <!-- Left Controls -->
     <transition name="fade">
@@ -103,7 +108,7 @@ function onClick(tag) {
 }
 
 
-const petSrc = new URL('../../common/images/8.jpg', import.meta.url).href
+const petSrc = new URL('../../common/images/mxr.png', import.meta.url).href
 const electronAPI = window?.electronAPI ?? null
 function safeIgnore(flag) { electronAPI?.setIgnoreMouseEvents(flag) }
 
@@ -112,7 +117,7 @@ const isDragging = ref(false)
 let offsetX = 0, offsetY = 0
 
 const imgEl = ref(null)
-const imgW = ref(120), imgH = ref(120)
+const imgW = ref(800), imgH = ref(1000)
 function updateImgSize() {
   imgW.value = imgEl.value.offsetWidth
   imgH.value = imgEl.value.offsetHeight

@@ -3,7 +3,7 @@ import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 export default function usePetLogic() {
   // —— 资源 & Electron 接口 —— 
-  const petSrc = new URL('../../common/images/8.jpg', import.meta.url).href
+  const petSrc = new URL('../../common/images/mxr.png', import.meta.url).href
   const electronAPI = window.electronAPI || null
   const safeIgnore = flag => electronAPI?.setIgnoreMouseEvents(flag)
 

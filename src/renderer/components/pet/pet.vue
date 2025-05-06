@@ -6,14 +6,20 @@
     @mouseleave="scheduleHide"
     @mousedown.prevent="startDrag"
   >
-    <img
-      ref="imgEl"
-      class="pet-img"
-      :src="petSrc"
-      alt="pet"
-      @load="updateImgSize"
-      :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
-    />
+    <!-- Pet Image -->
+  <img
+    ref="imgEl"
+    class="pet-img"
+    :src="petSrc"
+    alt="pet"
+    @load="updateImgSize"
+    @mousedown.prevent="startDrag"
+    :style="{
+      width:  imgW  + 'px',
+      height: imgH  + 'px',
+      cursor: isDragging ? 'grabbing' : 'grab'
+    }"
+  />
 
     <!-- 左侧按钮 -->
     <transition name="fade">
