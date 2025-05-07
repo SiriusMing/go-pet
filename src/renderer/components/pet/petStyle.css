@@ -12,7 +12,7 @@
 
 /* 图 */
 .pet-img {
-  width: 160px;
+  width: 150px;
   transition: transform .2s;
 }
 .pet-img:hover {
