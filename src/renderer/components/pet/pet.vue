@@ -1,3 +1,4 @@
+<!-- pet.vue -->
 <template>
   <div
     class="pet-wrapper"
@@ -7,20 +8,25 @@
     @mousedown.prevent="startDrag"
   >
     <!-- Pet Image -->
-  <img
-    ref="imgEl"
-    class="pet-img"
-    :src="petSrc"
-    alt="pet"
-    @load="updateImgSize"
-    @mousedown.prevent="startDrag"
-    :style="{
-      width:  imgW  + 'px',
-      height: imgH  + 'px',
-      cursor: isDragging ? 'grabbing' : 'grab'
-    }"
-  />
-
+    <!--
+    <img
+      ref="imgEl"
+      class="pet-img"
+      :src="petSrc"
+      alt="pet"
+      @load="updateImgSize"
+      @mousedown.prevent="startDrag"
+      :style="{
+        width:  imgW  + 'px',
+        height: imgH  + 'px',
+        cursor: isDragging ? 'grabbing' : 'grab'
+      }"-->
+    <!-- —— Live2D 模型容器 —— -->
+    <div
+      ref="modelContainer"
+      class="pet-model"
+      @mousedown.prevent="startDrag"
+    ></div>
     <!-- 左侧按钮 -->
     <transition name="fade">
       <div
@@ -78,28 +84,70 @@
 </template>
 
 <script setup>
-// —— 事件定义 ——  
-const emit = defineEmits(['open'])
-
-// —— 业务逻辑 ——  
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import * as PIXI from 'pixi.js'
+import { Live2DModel } from 'pixi-live2d-display'
 import usePetLogic from './petLogic.js'
+
 const {
-  x, y, isDragging, petSrc,
-  imgEl, updateImgSize,
-  ctrlVisible, nearLeft, nearRight,
-  leftStyle, rightStyle,
-  panelVisible, panelPos, panelEl,
-  showControls, scheduleHide,
-  startDrag, togglePanel,
-  exitApp,
-  features
+  x, y,
+  ctrlVisible, nearLeft, leftStyle, rightStyle,
+  showControls, scheduleHide, startDrag,
+  togglePanel, exitApp,
+  panelVisible, panelPos, panelEl, features,
 } = usePetLogic()
 
-// —— 点击抛事件给父组件 ——  
-function onClick(feature) {
-  emit('open', feature)
-}
+const modelContainer = ref(null)
+let app = null
+
+onMounted(async () => {
+  try {
+    // 确保只使用一个Pixi实例，注册Ticker类
+    Live2DModel.registerTicker(PIXI.Ticker)
+
+    // 创建Pixi应用
+    app = new PIXI.Application({
+      width: 120,
+      height: 120,
+      backgroundAlpha: 0,
+      autoStart: true,
+    })
+
+    // 添加canvas到DOM
+    modelContainer.value.appendChild(app.view)
+
+    // 加载Live2D模型（自动更新，不需要设置autoUpdate: false）
+    const model = await Live2DModel.from('/model/tomori/036_birthday_2024_ssr/index.json')
+
+    model.anchor.set(0.5, 1)
+    model.position.set(app.view.width / 2, app.view.height * 0.9)
+    model.scale.set(0.2)
+
+    app.stage.addChild(model)
+
+    model.once('ready', () => {
+      console.log('[DEBUG] Live2D model loaded successfully.')
+    })
+
+  } catch (err) {
+    console.error('[ERROR] Live2D initialization failed:', err)
+  }
+})
+
+onBeforeUnmount(() => {
+  app?.destroy(true, { children: true })
+  console.log('[DEBUG] Pixi Application destroyed')
+})
+
+const emit = defineEmits(['open'])
+function onClick(feature) { emit('open', feature) }
 </script>
 
-<style scoped src="./petStyle.css"></style>
 
+<style scoped src="./petStyle.css">
+.pet-model {
+  position: absolute; 
+  width: 120px;
+  height: 120px;
+}
+</style>
