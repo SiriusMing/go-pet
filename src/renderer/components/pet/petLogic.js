@@ -3,7 +3,7 @@ import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 export default function usePetLogic() {
   // —— 资源 & Electron 接口 ——  
-  const petSrc = new URL('../../common/images/mxr.png', import.meta.url).href
+  const petSrc = new URL('/model/rana/038_live_event_286_ur/index.json', import.meta.url).href
   const electronAPI = window.electronAPI || null
   const safeIgnore = flag => electronAPI?.setIgnoreMouseEvents(flag)
 
@@ -13,14 +13,16 @@ export default function usePetLogic() {
   let offsetX = 0, offsetY = 0
   // Live2D 容器引用，用于读取尺寸
   const modelContainer = ref(null)
-  const imgW = ref(120), imgH = ref(120)
+  const imgW = ref(180), imgH = ref(120)
 
   // —— 更新容器尺寸 ——  
   function updateImgSize() {
-    if (!modelContainer.value) return
-    imgW.value = modelContainer.value.offsetWidth
-    imgH.value = modelContainer.value.offsetHeight
-  }
+  if (!modelContainer.value || !modelContainer.value.firstChild) return
+  const canvas = modelContainer.value.firstChild
+  imgW.value = canvas.offsetWidth
+  imgH.value = canvas.offsetHeight
+}
+
 
   function startDrag(e) {
     isDragging.value = true
@@ -29,10 +31,33 @@ export default function usePetLogic() {
     offsetY = e.clientY - y.value
 
     function onMove(ev) {
-      if (!isDragging.value) return
-      x.value = Math.min(Math.max(0, ev.clientX - offsetX), window.innerWidth - imgW.value)
-      y.value = Math.min(Math.max(0, ev.clientY - offsetY), window.innerHeight - imgH.value)
-    }
+  if (!isDragging.value) return
+
+  /* ① 先算出“如果这一下拖过去，宠物的中心在哪里” */
+  const tentativeX = ev.clientX - offsetX          // 这一步先不截边
+  const center     = tentativeX + imgW.value / 2   // 水平中心
+
+  /* ② 判断哪边要显示按钮列 */
+  const showLeftCol  = center > CW + M             // 够位置 → 显示左列
+  const showRightCol = center < window.innerWidth - (CW + M)
+
+  /* ③ 依据列的显示情况，给左右边界留安全区 */
+  const extraLeft  = showLeftCol  ? CW + M : 0
+  const extraRight = showRightCol ? CW + M : 0
+
+  const minX = extraLeft-70                       // 不能再往左
+  const maxX = window.innerWidth - imgW.value - extraRight -23
+
+  /* ④ 终于真正裁剪并赋值 */
+  x.value = Math.min(Math.max(minX, tentativeX), maxX)
+
+  /* —— 垂直方向直接卡住模型本身即可 —— */
+  const tentativeY = ev.clientY - offsetY
+  const minY       = 0
+  const maxY       = window.innerHeight - imgH.value -150
+  y.value = Math.min(Math.max(minY, tentativeY), maxY)
+}
+
     function onUp() {
       isDragging.value = false
       window.removeEventListener('mousemove', onMove)
@@ -58,23 +83,36 @@ export default function usePetLogic() {
     }, 1000)
   }
 
-  // —— 左右列位置计算 ——  
-  const M = 6, CW = 80, CH = 120
-  const nearLeft  = computed(() => x.value < CW + M)
-  const nearRight = computed(() => x.value + imgW.value > window.innerWidth - CW - M)
+ // —— 左右列位置计算 ——  
+const M  = 6    // 和模型之间的最小间隙
+const CW = 40  // 按钮列宽度（px），正值
+const CH = 100  // 按钮列高度（px），正值
+const HO = -10   // 额外水平偏移（正值：越大越往外）
 
-  const leftStyle = computed(() => {
-    const lx = nearLeft.value ? x.value + imgW.value + M : x.value - CW - M
-    let ly = y.value + (imgH.value - CH) / 2
-    ly = Math.max(M, Math.min(ly, window.innerHeight - CH - M))
-    return { left: lx + 'px', top: ly + 'px' }
-  })
-  const rightStyle = computed(() => {
-    const rx = nearRight.value ? x.value - CW - M : x.value + imgW.value + M
-    let ry = y.value + (imgH.value - CH) / 2
-    ry = Math.max(M, Math.min(ry, window.innerHeight - CH - M))
-    return { left: rx + 'px', top: ry + 'px' }
-  })
+// 1. 先算出模型的水平中心
+const centerX   = computed(() => x.value + imgW.value / 2)
+
+// 2. 阈值：离左边缘 / 右边缘多远，就认为“靠近”
+//    HO 正值往外推，HO 负值往里收
+const leftThreshold  = CW + M + HO
+const rightThreshold = window.innerWidth - (CW + M + HO)
+
+// 3. 判定：如果中心在左阈值以内，就算 nearLeft；如果中心过了右阈值，就算 nearRight
+const nearLeft  = computed(() => centerX.value < leftThreshold)
+const nearRight = computed(() => centerX.value > rightThreshold)
+
+
+const leftStyle = computed(() => {
+  // 模型右侧贴左列，或模型左侧贴左列  模型没有居中对其 所以改了位置偏移
+  const lx = nearLeft.value ? imgW.value + M + HO : -CW - M - HO
+   return { left: `${lx + 35}px` }
+})
+
+const rightStyle = computed(() => {
+  const rx = nearRight.value ? -CW - M - HO : imgW.value + M + HO
+   return { left: `${rx + 65}px` }
+})
+
 
   // —— Other 面板 ——  
   const features     = ['Fun1', 'Fun2', 'Fun3']
