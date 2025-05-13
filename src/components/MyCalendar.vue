@@ -35,11 +35,14 @@
 <script>
 export default {
   data() {
+    const today = new Date();
     return {
       currentDate: new Date(),
       daysInMonth: [],
       paddedDays: [],  // 用于存储处理过的日历天数
       selectedDay: null, // 用于存储当前选中的日期
+      currentYear: today.getFullYear(),   // 如 2025
+      currentMonth: today.getMonth() + 1, // 注意：JS 中月份是 0~11
     };
   },
   mounted() {
@@ -67,7 +70,8 @@ export default {
     goToMemo(day) {
       if (day) {
         this.selectedDay = day;
-        this.$router.push({ name: 'memo', params: { date: day } });
+        const selectedDate = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        this.$router.push({ name: 'memo', params: { date: selectedDate } });
       }
     },
     // 修改月份（-1表示上一月，1表示下一月）

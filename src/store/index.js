@@ -46,8 +46,16 @@ const store = createStore({
     },
     // 加载本地存储里的事件
     loadEvents({ commit }) {
-      const events = JSON.parse(localStorage.getItem('events')) || [];
-      commit('setEvents', events);
+      return new Promise((resolve, reject) => {
+        const raw = localStorage.getItem('events');
+        if (raw) {
+          const events = JSON.parse(raw);
+          commit('setEvents', events);
+          resolve(events);
+        } else {
+          reject('No events found in localStorage');
+        }
+      });
     }
   },
   getters: {
