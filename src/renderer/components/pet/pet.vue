@@ -1,38 +1,29 @@
-<!-- pet.vue -->
+// File: pet.vue
 <template>
+  <!-- 整个宠物容器，设置为 relative 以便气泡定位 -->
+  <!-- 整个宠物容器：宽高随模型大小变化 -->
   <div
     class="pet-wrapper"
-   :style="{
-     left:  x + 'px',
-     top:   y + 'px'
-   }"
+    :class="'role-'+(roleIdx+1)"
+    :style="{
+      left: x + 'px',
+      top:  y + 'px',
+      position: 'absolute',
+      width:  imgW + 'px',
+      height: imgH + 'px'
+    }"
     @mouseenter="showControls"
     @mouseleave="scheduleHide"
-    @mousedown.prevent="startDrag"
   >
-    <!-- Pet Image -->
-    <!--
-    <img
-      ref="imgEl"
-      class="pet-img"
-      :src="petSrc"
-      alt="pet"
-      @load="updateImgSize"
-      @mousedown.prevent="startDrag"
-      :style="{
-        width:  imgW  + 'px',
-        height: imgH  + 'px',
-        cursor: isDragging ? 'grabbing' : 'grab'
-      }"-->
-    <!-- —— Live2D 模型容器 —— -->
-    <div
-      ref="modelContainer"
-      class="pet-model"
-      :src="petSrc"
-      alt="pet"
-      @load="updateImgSize"
-      @mousedown.prevent="startDrag"
-    ></div>
+    <!-- Live2D 容器 -->
+    <div ref="modelContainer" class="pet-model" 
+      @mousedown.prevent="handleStartDrag"
+    @mouseup="handleEndDrag"
+    />
+
+    <!-- 对话气泡：相对于角色容器定位，置于模型下方 -->
+    <div id="waifu-tips" class="waifu-tips"></div>
+
     <!-- 左侧按钮 -->
     <transition name="fade">
       <div
@@ -42,9 +33,9 @@
         @mouseenter="showControls"
         @mouseleave="scheduleHide"
       >
-        <button class="btn icon info-btn"     @click="onClick('Info')">👤</button>
-        <button class="btn icon settings-btn" @click="onClick('Settings')">⚙</button>
-        <button class="btn circle switch-btn" @click="onClick('Switch')">S</button>
+        <button class="btn icon info-btn"     @click="handleFeature('Info')">👤</button>
+        <button class="btn icon settings-btn" @click="handleFeature('Settings')">⚙</button>
+        <button class="btn circle switch-btn" @click="switchRole">S</button>
         <button class="btn circle exit-btn"   @click="exitApp">E</button>
       </div>
     </transition>
@@ -58,8 +49,8 @@
         @mouseenter="showControls"
         @mouseleave="scheduleHide"
       >
-        <button class="btn circle dress-btn" @click="onClick('Dress')">D</button>
-        <button class="btn rect chat-btn"    @click="onClick('Chat')">Chat</button>
+        <button class="btn circle dress-btn" @click="switchDress">D</button>
+        <button class="btn rect chat-btn"    @click="handleFeature('Chat')">Chat</button>
         <button
           v-if="!panelVisible"
           class="btn rect other-btn"
@@ -82,7 +73,7 @@
           v-for="f in features"
           :key="f"
           class="panel-item"
-          @click="onClick(f)"
+          @click="handleFeature(f)"
         >{{ f }}</div>
       </div>
     </transition>
@@ -90,90 +81,140 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount} from 'vue'
-import * as PIXI from 'pixi.js'
-import { Live2DModel } from 'pixi-live2d-display'
+import { onMounted, onBeforeUnmount } from 'vue'
 import usePetLogic from './petLogic.js'
+import { useLive2dModel } from '../composables/useLive2dModel.js'
 
+
+
+// 基础控制/拖拽逻辑
+const petApi = usePetLogic()
 const {
   x, y,
-  ctrlVisible, nearLeft, leftStyle, rightStyle,
+  imgW, imgH,
+  ctrlVisible, nearLeft, nearRight,
+  leftStyle, rightStyle,
   showControls, scheduleHide, startDrag,
   togglePanel, exitApp,
-  panelVisible, panelPos, panelEl, features,          
-  updateImgSize
-} = usePetLogic()
+  panelVisible, panelPos, panelEl, features,
+  updateImgSize, modelContainer
+} = petApi
 
-const modelContainer = ref(null)
-let app = null
+// Live2D 组合函数：解构出 roleIdx 以便切换色调
+const {
+  roleIdx,
+  nextModel: switchRole,
+  nextTexture: switchDress,
+  isDragging,
+  speak
+} = useLive2dModel(modelContainer, updateImgSize)
 
-onMounted(async () => {
-  try {
-    /* ──1. 分辨率策略──
-     - 逻辑尺寸 (在页面上看到的大小) 180×250
-     - 高 DPI 清晰度：只改 resolution / autoDensity，
-       不再把 width/height 乘 DPR，也不再用 style 压回 */
-  const VIEW_W = 265
-  const VIEW_H = 265
-  const DPR     = window.devicePixelRatio || 1     
+//拖拽
+function handleStartDrag(e) {
+  isDragging.value = true
+  startDrag(e)
+}
+function handleEndDrag(e) {
+  isDragging.value = false
+  scheduleHide()
+}
 
-  Live2DModel.registerTicker(PIXI.Ticker)
+onMounted(() => window.addEventListener('mouseup', handleEndDrag))
+onBeforeUnmount(() => window.removeEventListener('mouseup', handleEndDrag))
 
-  app = new PIXI.Application({
-    width          : VIEW_W,        // 逻辑尺寸保持不变
-    height         : VIEW_H,
-    resolution     : DPR,           // 真正决定像素密度
-    autoDensity    : true,          // 告诉 Pixi 用高分辨率渲染
-    backgroundAlpha: 0,
-    autoStart      : true,
-    antialias      : true           // 视情况可关
-  })
-
-  /* ──2. 让 canvas 默认不吃鼠标事件──
-     - React/Vue 里拖拽时再临时打开即可
-     - 如果你的拖拽逻辑用到 safeIgnore(false)，
-       这里保持 'none' 也没问题，因为事件走 Electron 的 forward 通道 */
-  app.view.style.pointerEvents = 'none'
-
-  modelContainer.value.appendChild(app.view)
-
-  /* ──3. 加载并摆放 Live2D 模型── */
-  const model = await Live2DModel.from('/model/rana/038_live_event_235_sr/index.json')
-  model.anchor.set(0.5, 0.9)                            // 脚踩底边
-  model.position.set(app.view.width / 2, app.view.height)
-  model.scale.set(0.17)                                 // 比原来稍大
-
-  app.stage.addChild(model)
-  // 模型 ready 后再更新一次容器尺寸
-  model.once('ready', () => {
-    updateImgSize()
- })
-  
-
-    model.once('ready', () => {
-      console.log('[DEBUG] Live2D model loaded successfully.')
-    })
-
-  } catch (err) {
-    console.error('[ERROR] Live2D initialization failed:', err)
-  }
-})
-
-onBeforeUnmount(() => {
-  app?.destroy(true, { children: true })
-  console.log('[DEBUG] Pixi Application destroyed')
-})
-
+//我会说话了
 const emit = defineEmits(['open'])
-function onClick(feature) { emit('open', feature) }
+function handleFeature(feature) {
+  speak()
+  emit('open', feature)
+}
 </script>
 
+<style scoped src="./petStyle.css" />
+<style scoped>
 
-<style scoped src="./petStyle.css">
-.pet-model {
-  position: relative;      /* 或干脆删掉 */
-  display: inline-block;   /* 让它“缩紧”到 canvas 本身 */
-  overflow: visible;
+/* 对话气泡的像素风样式，左下角 */
+.pet-wrapper .waifu-tips {
+  position: absolute;
+  bottom: calc(100% - 27px); 
+  left: 0;
+  transform: translateX(20%);
+  width: 215px;                /* 固定宽度 */
+  padding: 4px 6px;
+  box-sizing: border-box;      /* 含边框在内 */
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: normal;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  box-shadow: 2px 2px 0 #000, -2px -2px 0 #000 inset;
+  image-rendering: pixelated;
+  opacity: 0;                   /* 默认隐藏 */
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 气泡尾巴：等宽三角形，指向下方 */
+.pet-wrapper .waifu-tips::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #000;   /* 与 border-color 保持一致 */
+}
+
+/* 激活态：4s 内 showMessage 会给这个类，触发淡入 */
+#waifu-tips.waifu-tips-active {
+  opacity: 1;
+}
+
+/* 五个角色的对话框css */
+
+/* 灰色色调 → role-1 */
+.pet-wrapper.role-1 .waifu-tips {
+  background: rgba(239, 237, 237, 0.8);
+  color: #000000;
+}
+
+/* 粉色色调（role-2） */
+.pet-wrapper.role-2 .waifu-tips {
+  background: rgba(253, 222, 226, 0.8);
+  color: #000000;
+}
+/* 绿色色调（role-3） */
+.pet-wrapper.role-3 .waifu-tips {
+  background: rgba(199, 249, 199, 0.8);
+  color: #000;
+}
+/* 黄色色调（role-4） */
+.pet-wrapper.role-4 .waifu-tips {
+  background: rgba(252, 252, 200, 0.8);
+  color: #000;
+}
+/* 紫色色调（role-5） */
+.pet-wrapper.role-5 .waifu-tips {
+  background: rgba(255, 223, 255, 0.8);
+  color: #000000;
 }
 
 </style>
+
+<!-- 全局隐藏滚动条 把多余的拖动条隐藏-->
+<style>
+html, body {
+  overflow: hidden !important;
+}
+</style>
+
+
+
+
+
