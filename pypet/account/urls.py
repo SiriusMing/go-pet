@@ -2,6 +2,7 @@ from django.urls import path
 from .apis import UserRegisterApi,UserLoginApi
 from .apis import modifyPasswordApi,modifyEmailApi,modifyPhoneApi,modifyGenderApi,modifyNameApi,ModifyPasswordApi
 from .apis import Is_PasswordApi,ResetPasswordApi,checkphoneApi,GetAllUserInfoApi,askUserlengthApi,HeartBeatApi
+from .apis import callDeepSeekApi
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -26,4 +27,5 @@ urlpatterns = [
     path("getUserLength/",askUserlengthApi.as_view(),name="getUserLength"),
     path("heartBeat/",HeartBeatApi.as_view(),name="heartBeat"),
     path("modify/",ModifyPasswordApi.as_view(),name="modifyPassword"),
+    path("callds/",callDeepSeekApi.as_view(),name="calldeepseek"),
 ]

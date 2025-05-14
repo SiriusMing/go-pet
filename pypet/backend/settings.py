@@ -65,6 +65,8 @@ THIRD_PARTY_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'drf_yasg',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 INSTALLED_APPS = [

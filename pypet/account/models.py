@@ -13,5 +13,6 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=6, verbose_name="角色", default="")
     token = models.CharField(max_length=8, verbose_name="token", default="")
     token_expires = models.DateTimeField(verbose_name="token过期时间", auto_now=True)
+    call_times = models.IntegerField(verbose_name="调用AI次数",default=0)
     def __str__(self):
         return self.name  # 确保返回的是字符串类型  否则会报错

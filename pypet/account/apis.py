@@ -26,8 +26,12 @@ import os
 from datetime import datetime
 from math import ceil
 from pathlib import Path
+import json
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from drf_yasg.utils import swagger_auto_schema
+import string
+import requests
+import random
 
 # 加密
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +40,132 @@ key = os.environ.get(
     'PYOTP_SECRET_KEY',
     '8\xae\xdbp|h\x80\n\xfd\x9f\xa1\xfb\xf6W$\xd6'
 )
+
+# API配置
+DeepSeek_API_Key = os.environ.get("DeepSeek_API_Key")
+DeepSeek_API_URL = "https://api.deepseek.com/v1/chat/completions"
+
+# 实现多轮对话
+# client = OpenAI(api_key="<DeepSeek API Key>", base_url="https://api.deepseek.com")
+
+# # Round 1
+# messages = [{"role": "user", "content": "What's the highest mountain in the world?"}]
+# response = client.chat.completions.create(
+#     model="deepseek-chat",
+#     messages=messages
+# )
+
+# messages.append(response.choices[0].message)
+# print(f"Messages Round 1: {messages}")
+
+# # Round 2
+# messages.append({"role": "user", "content": "What is the second?"})
+# response = client.chat.completions.create(
+#     model="deepseek-chat",
+#     messages=messages
+# )
+
+# messages.append(response.choices[0].message)
+# print(f"Messages Round 2: {messages}")
+
+
+def call_deepseek_chat(prompt, model="deepseek-chat", temperature=0.3, max_tokens=2048):
+    """
+    调用DeepSeek聊天API
+    
+    参数:
+    prompt : str - 用户输入的提示内容
+    model : str - 使用的模型名称(默认: deepseek-chat)
+    temperature : float - 生成多样性(默认: 0.3)
+    max_tokens : int - 最大生成token数(默认: 2048)
+    
+    返回:
+    str - API返回内容或错误信息
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {DeepSeek_API_Key}"
+    }
+    
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": temperature,
+        "max_tokens": max_tokens
+    }
+    
+    try:
+        response = requests.post(
+            DeepSeek_API_URL,
+            headers=headers,
+            data=json.dumps(payload)
+        )
+        response.raise_for_status()
+        result = response.json()
+        return result["choices"][0]["message"]["content"] if result.get("choices") else "Error: No response content"
+        
+    except requests.exceptions.HTTPError as http_err:
+        return f"HTTP error ({http_err.response.status_code}): {http_err.response.text}"
+    except Exception as err:
+        return f"Request failed: {str(err)}"
+
+
+
+class callDeepSeekApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        """
+        处理用户请求的API端点
+        请求体格式：{"prompt": "你的问题"}
+        """
+        try:
+            # 参数验证
+            if not (user_prompt := request.data.get("prompt")):
+                return Response(
+                    {"error": "Missing required field 'prompt'"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            username=request.user.username
+            user=CustomUser.objects.get(username=username)
+            user.call_times+=1
+            if(user.call_times > 100):
+                return Response(
+                    {
+                        "status": "Failure",
+                        "content": "There have been too many inquiries today. Refresh count at 0 o'clock every day",
+                        "model": "System"
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            user.save()  # 必须调用save()才能保存到数据库
+            # 调用API函数
+            api_response = call_deepseek_chat(user_prompt)  # 直接调用本地函数
+
+            # 错误处理
+            if any(keyword in api_response.lower() for keyword in ["error", "failed"]):
+                return Response(
+                    {"error": api_response},
+                    status=status.HTTP_502_BAD_GATEWAY  # 更准确的错误状态码
+                )
+
+            # 成功响应
+            return Response(
+                {
+                    "status": "success",
+                    "content": api_response,
+                    "model": "deepseek-chat"
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Server error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
