@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # test
 
 An Electron application with Vue
@@ -32,3 +33,7 @@ $ yarn build:mac
 # For Linux
 $ yarn build:linux
 ```
+=======
+# go-pet
+go-pet
+>>>>>>> remotes/origin/main
