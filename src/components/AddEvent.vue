@@ -52,15 +52,21 @@ export default {
       }
     };
   },
+
   created() {
     if (this.event.id) {
-      // 如果有 eventId，表示是编辑事件，加载已有事件的内容
-      const existingEvent = this.$store.state.events.find(event => event.id === this.event.id);
+      // console.log("Edit the event");
+      const numericId = Number(this.event.id); // 将字符串转为数字
+      const existingEvent = this.$store.state.events.find(event => event.id === numericId);
       if (existingEvent) {
-        this.event = { ...existingEvent };  // 填充表单
+        // console.log("Pad the page");
+        this.event = { ...existingEvent };
+      } else {
+        console.warn("Event not found:", numericId);
       }
     }
   },
+
   watch: {
     // 监听事件日期的变化，确保取消跳转时能够带入正确日期
     'event.date'(newDate) {
@@ -69,6 +75,7 @@ export default {
       }
     }
   },
+
   methods: {
     // 保存新事件或更新已有事件
     saveEvent() {
@@ -83,14 +90,16 @@ export default {
       // 跳转到备忘录页面，并传递事件日期
       this.$router.push({ name: 'memo', params: { date: this.event.date } });
     },
+
     // 取消操作返回备忘录页面
     goBackToMemo() {
-      // 如果没有日期，使用当前日期
-      const date = this.event.date || new Date().toISOString().split('T')[0];
+      // 优先使用路由传进来的日期参数，如果没有则使用事件中的日期
+      const date = this.event.date || this.$route.params.date || new Date().toISOString().split('T')[0];
       this.$router.push({ name: 'memo', params: { date } });
     }
   }
 };
+
 </script>
 
 <style scoped>
