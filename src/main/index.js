@@ -1,6 +1,6 @@
 //主进程
 
-import { app, BrowserWindow, ipcMain, screen } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, screen} from 'electron'
 import { join } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 
@@ -35,10 +35,15 @@ skipTaskbar: true,
 // fullscreen 可选，如需要真正全屏方式可以添加 fullscreen: true,
 fullscreenable: false,
 focusable: false, // 默认不聚焦（辅助鼠标穿透）
+icon: join(__dirname, '../../resources/icon.png'),
 backgroundColor: '#00000000',
 webPreferences: {
 preload: join(__dirname, '../preload/index.js'),
 contextIsolation: true,
+//禁用同源 允许跨域
+webSecurity: false,
+//禁止build环境使用Devtool
+devTools: is.dev ? true : false,
 sandbox: false
 }
 })
@@ -61,6 +66,14 @@ mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
 ipcMain.on('exit-app', () => {
 app.quit()
 })
+
+//快捷键
+
+globalShortcut.register('CommandOrControl+Shift+i', function ()
+{
+  mainWindow.webContents.openDevTools()
+})
+
 
 // 切换鼠标事件状态的 IPC 事件
 ipcMain.on('set-ignore-mouse-events', (_, ignore) => {

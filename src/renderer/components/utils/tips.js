@@ -918,6 +918,8 @@ const tips = {
         }
       ]
     ],
+
+    //加载
     "visibilitychange": [
       [
         {
@@ -1011,306 +1013,317 @@ const tips = {
         ]
       ]
     },
+{
+  "selector": "#waifu-tool-switch-model",
+  "text": [
+    [
+      {
+        "text": "Oh, you're here! I've been waiting for you.",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "Welcome back! Ready to have some fun?",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "Hi there. It’s so good to see you again.",
+        "motion": "smile04"
+      }
+    ],
+    [
+      {
+        "text": "Hey. How is everything going? ",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "Let’s enjoy our time together today.",
+        "motion": "smile02"
+      }
+    ]
+  ]
+},
+
+    //换装的
     {
-      "selector": "#waifu-tool-switch-model",
-      "text": [
-        [
-          {
-            "text": "大家，可以过来一下吗？",
-            "motion": "smile01"
-          }
-        ],
-        [
-          {
-            "text": "大家，这边这边～",
-            "motion": "smile02"
-          }
-        ],
-        [
-          {
-            "text": "大家，来这里。",
-            "motion": "serious01"
-          }
-        ],
-        [
-          {
-            "text": "大家，看向这里～",
-            "motion": "smile03"
-          }
-        ],
-        [
-          {
-            "text": "大家，能过来吗？",
-            "motion": "smile04"
-          }
-        ]
-      ]
-    },
+  "selector": "#waifu-tool-switch-texture",
+  "text": [
+    [
+      {
+        "text": "Time for a new outfit…",
+        "motion": "thinking01"
+      }
+    ],
+    [
+      {
+        "text": "Want to see my latest collection?",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "This outfit… looks amazing.",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "My taste in clothes can be… quite unique, huh.",
+        "motion": "sigh01"
+      }
+    ],
+    [
+      {
+        "text": "If you think it’s nice, I’ll go ahead and change.",
+        "motion": "smile03"
+      }
+    ]
+  ]
+},
+
+{
+  "selector": "#waifu-tool-begin",
+  "text": [
+    [
+      {
+        "text": "Hello, welcome to MYGOSIDE.",
+        "motion": "surprised01"
+      }
+    ],
+    [
+      {
+        "text": "Welcome to MYGOSIDE. I hope it brings comfort to your heart.",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "MYGO!!!!!!! is always with you.",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "Welcome to MYGOSIDE. Author's GitHub: SiriusMing — feel free to follow or reach out!",
+        "motion": "serious01"
+      }
+    ],
+    [
+      {
+        "text": "I hope to bring you a sense of companionship. Welcome aboard!",
+        "motion": "smile04"
+      }
+    ]
+  ]
+},
+
     {
-      "selector": "#waifu-tool-switch-texture",
-      "text": [
-        [
-          {
-            "text": "换一身衣服吧……",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "哼哼～要看看「ANON TOKYO」的新作吗？",
-            "motion": "smile01"
-          }
-        ],
-        [
-          {
-            "text": "衣服……好看。",
-            "motion": "smile02"
-          }
-        ],
-        [
-          {
-            "text": "小爱音的品味真是有些一言难尽呢。",
-            "motion": "sigh01"
-          }
-        ],
-        [
-          {
-            "text": "既然灯觉得这件衣服好，那我就换一下吧。",
-            "motion": "smile03"
-          }
-        ]
-      ]
-    },
+  "selector": "#waifu-tool-fun",
+  "text": [
+    [
+      {
+        "text": "Which function would you like to use?",
+        "motion": "surprised01"
+      }
+    ],
+    [
+      {
+        "text": "Take a look—anything you want to try?",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "Could you go to FUN3 and unlock a new CG for me?",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "FUN2 can track your emotions, you know.",
+        "motion": "serious01"
+      }
+    ],
+    [
+      {
+        "text": "Have you completed the plan in FUN1?",
+        "motion": "surprised02"
+      }
+    ]
+  ]
+},
+
+//info按钮
+
+   {
+  "selector": "#waifu-tool-info",
+  "text": [
+    [
+      {
+        "text": "Let me get to know more about you.",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "Is this your info...? Got it memorized.",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "Learning more about you... doesn’t sound bad at all.",
+        "motion": "thinking01"
+      }
+    ],
+    [
+      {
+        "text": "I’d love to get to know you better.",
+        "motion": "serious01"
+      }
+    ],
+    [
+      {
+        "text": "Getting to know each other truly is something meaningful.",
+        "motion": "smile03"
+      }
+    ]
+  ]
+},
+    //关闭
+    
+   {
+  "selector": "#waifu-tool-quit",
+  "text": [
+    [
+      {
+        "text": "Well then... see you next time...",
+        "motion": "bye01"
+      }
+    ],
+    [
+      {
+        "text": "Goodbye! Have fun!",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "Goodbye.",
+        "motion": "bye02"
+      }
+    ],
+    [
+      {
+        "text": "See you next time!",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "Let's call it a day for now.",
+        "motion": "serious01"
+      }
+    ]
+  ]
+},
+
+// 设置的
     {
-      "selector": "#waifu-tool-photo",
-      "text": [
-        [
-          {
-            "text": "诶？要照相……吗？",
-            "motion": "surprised01"
-          }
-        ],
-        [
-          {
-            "text": "来拍张照吧～大家一起～",
-            "motion": "smile01"
-          }
-        ],
-        [
-          {
-            "text": "照相？抹茶芭菲。",
-            "motion": "smile02"
-          }
-        ],
-        [
-          {
-            "text": "我没说不拍。",
-            "motion": "serious01"
-          }
-        ],
-        [
-          {
-            "text": "哈？要照相？",
-            "motion": "surprised02"
-          }
-        ]
-      ]
-    },
+  "selector": "#waifu-tool-settings",
+  "text": [
+    [
+      {
+        "text": "This is where you can update your information.",
+        "motion": "thinking01"
+      },
+      {
+        "text": "Feel free to make changes anytime.",
+        "motion": "smile01"
+      }
+    ],
+    [
+      {
+        "text": "Do you have any profile details you'd like to update?",
+        "motion": "thinking01"
+      },
+      {
+        "text": "Keeping things accurate is important!",
+        "motion": "smile02"
+      }
+    ],
+    [
+      {
+        "text": "You didn’t forget your own birthday, did you?",
+        "motion": "thinking01"
+      },
+      {
+        "text": "Just making sure~",
+        "motion": "smile03"
+      }
+    ],
+    [
+      {
+        "text": "It’s good to fix any incorrect information promptly.",
+        "motion": "thinking01"
+      },
+      {
+        "text": "That way everything stays neat and correct.",
+        "motion": "smile04"
+      }
+    ],
+    [
+      {
+        "text": "This is the settings area—where you can adjust your info.",
+        "motion": "thinking01"
+      },
+      {
+        "text": "Go ahead and make your information right!",
+        "motion": "serious01"
+      }
+    ]
+  ]
+},
     {
-      "selector": "#waifu-tool-info",
-      "text": [
-        [
-          {
-            "text": "想和大家……增进一下了解……",
-            "motion": "smile01"
-          }
-        ],
-        [
-          {
-            "text": "想要知道更多关于我的事吗？其实啊……",
-            "motion": "smile02"
-          }
-        ],
-        [
-          {
-            "text": "外婆以前开了一家Live House……",
-            "motion": "serious01"
-          }
-        ],
-        [
-          {
-            "text": "多互相了解真的是一件有意义的事呢。",
-            "motion": "smile03"
-          }
-        ],
-        [
-          {
-            "text": "了解更多信息吗……也不错呢。",
-            "motion": "thinking01"
-          }
-        ]
-      ]
-    },
-    {
-      "selector": "#waifu-tool-quit",
-      "text": [
-        [
-          {
-            "text": "那么……下次见……",
-            "motion": "bye01"
-          }
-        ],
-        [
-          {
-            "text": "再见！玩得开心哦！",
-            "motion": "smile01"
-          }
-        ],
-        [
-          {
-            "text": "再见。",
-            "motion": "bye02"
-          }
-        ],
-        [
-          {
-            "text": "下次见！",
-            "motion": "smile02"
-          }
-        ],
-        [
-          {
-            "text": "今天就先到这里吧。",
-            "motion": "serious01"
-          }
-        ]
-      ]
-    },
-    {
-      "selector": ".menu-item-home a",
-      "text": [
-        [
-          {
-            "text": "要回到首页吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要回到首页吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要回到首页吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要回到首页吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要回到首页吗？",
-            "motion": "thinking01"
-          }
-        ]
-      ]
-    },
-    {
-      "selector": ".menu-item-about a",
-      "text": [
-        [
-          {
-            "text": "要了解这个网站吗？",
-            "motion": "thinking01"
-          },
-          {
-            "text": "这个人……感觉是个好人。",
-            "motion": "smile01"
-          }
-        ],
-        [
-          {
-            "text": "要了解这个网站吗？",
-            "motion": "thinking01"
-          },
-          {
-            "text": "这是我们MyGO!!!!!的粉丝哦！你要不要也关注一下？",
-            "motion": "smile02"
-          }
-        ],
-        [
-          {
-            "text": "要了解这个网站吗？",
-            "motion": "thinking01"
-          },
-          {
-            "text": "有趣的人。",
-            "motion": "smile03"
-          }
-        ],
-        [
-          {
-            "text": "要了解这个网站吗？",
-            "motion": "thinking01"
-          },
-          {
-            "text": "是很温柔的人呢。",
-            "motion": "smile04"
-          }
-        ],
-        [
-          {
-            "text": "要了解这个网站吗？",
-            "motion": "thinking01"
-          },
-          {
-            "text": "不像是坏人。",
-            "motion": "serious01"
-          }
-        ]
-      ]
-    },
-    {
-      "selector": ".menu-item-tags a",
-      "text": [
-        [
-          {
-            "text": "要看看文章的标签吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要看看文章的标签吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要看看文章的标签吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要看看文章的标签吗？",
-            "motion": "thinking01"
-          }
-        ],
-        [
-          {
-            "text": "要看看文章的标签吗？",
-            "motion": "thinking01"
-          }
-        ]
-      ]
-    },
+  "selector": "#waifu-tool-chat",
+  "text": [
+    [
+      {
+        "text": "Do you want to chat with me?",
+        "motion": "thinking01"
+      }
+    ],
+    [
+      {
+        "text": "What would you like to talk about today?",
+        "motion": "thinking01"
+      }
+    ],
+    [
+      {
+        "text": "This is the chat area—feel free to talk to me here.",
+        "motion": "thinking01"
+      }
+    ],
+    [
+      {
+        "text": "Tell me what’s been bothering you.",
+        "motion": "thinking01"
+      }
+    ],
+    [
+      {
+        "text": "I’m looking forward to our conversation.",
+        "motion": "thinking01"
+      }
+    ]
+  ]
+},
     {
       "selector": ".menu-item-categories a",
       "text": [
@@ -2965,8 +2978,6 @@ const tips = {
       ]
     }
   ],
-
-  //不同的几个按钮的时候 会说的话
 
 
   //TODO: 考虑是否加入用户生日读取后的生日祝福 

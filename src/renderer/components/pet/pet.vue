@@ -33,10 +33,10 @@
         @mouseenter="showControls"
         @mouseleave="scheduleHide"
       >
-        <button class="btn icon info-btn"     @click="handleFeature('Info')">👤</button>
-        <button class="btn icon settings-btn" @click="handleFeature('Settings')">⚙</button>
-        <button class="btn circle switch-btn" @click="switchRole">S</button>
-        <button class="btn circle exit-btn"   @click="exitApp">E</button>
+        <button class="btn icon info-btn"     @click="handleInfo('Info')">👤</button>
+        <button class="btn icon settings-btn" @click="handleSettings('Settings')">⚙</button>
+        <button id="waifu-tool-switch-model" class="btn circle switch-btn" @click="handleSwitchRole">S</button>
+        <button id="waifu-tool-quit" class="btn circle exit-btn"   @click="handleExit">E</button>
       </div>
     </transition>
 
@@ -49,12 +49,17 @@
         @mouseenter="showControls"
         @mouseleave="scheduleHide"
       >
-        <button class="btn circle dress-btn" @click="switchDress">D</button>
-        <button class="btn rect chat-btn"    @click="handleFeature('Chat')">Chat</button>
+        <!-- 换装按钮：先换装再触发 speak() -->
+    <button
+      id="waifu-tool-switch-texture"
+      class="btn circle dress-btn"
+      @click="handleDress"
+    >D</button>
+        <button class="btn rect chat-btn"    @click="handleChat('Chat')">Chat</button>
         <button
           v-if="!panelVisible"
           class="btn rect other-btn"
-          @click.stop="togglePanel"
+          @click.stop="handleOther"
         >Other</button>
       </div>
     </transition>
@@ -86,7 +91,6 @@ import usePetLogic from './petLogic.js'
 import { useLive2dModel } from '../composables/useLive2dModel.js'
 
 
-
 // 基础控制/拖拽逻辑
 const petApi = usePetLogic()
 const {
@@ -114,7 +118,7 @@ function handleStartDrag(e) {
   isDragging.value = true
   startDrag(e)
 }
-function handleEndDrag(e) {
+function handleEndDrag() {
   isDragging.value = false
   scheduleHide()
 }
@@ -128,6 +132,43 @@ function handleFeature(feature) {
   speak()
   emit('open', feature)
 }
+
+function handleInfo() {
+  speak('#waifu-tool-info')
+  emit('open', 'Info')
+}
+
+function handleSettings() {
+  speak('#waifu-tool-settings')
+  emit('open', 'Settings')
+}
+
+function handleSwitchRole() {
+  switchRole()
+}
+
+function handleChat() {
+  speak('#waifu-tool-chat')
+  emit('open', 'Chat')
+}
+
+function handleOther() {
+  speak('#waifu-tool-fun')
+  togglePanel()
+}
+
+async function handleExit() {
+  speak('#waifu-tool-quit')
+  setTimeout(() => exitApp(), 4000)
+}
+
+function handleDress() {
+  // 换装：逻辑已移到 useLive2dModel.nextTexture()，会自己说话
+  switchDress()
+}
+
+
+
 </script>
 
 <style scoped src="./petStyle.css" />

@@ -1,70 +1,56 @@
-// petLogic.js
-import { ref, computed, nextTick, onMounted, onBeforeUnmount,watch } from 'vue'
-
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 
 export default function usePetLogic() {
   // —— 资源 & Electron 接口 ——  
-  //我也不知道 但是URL后就可以渲染。。 后面再说吧
-  const petSrc = new URL('/model/rana/038_live_event_286_ur/index.json', import.meta.url).href
+  const petSrc = new URL('../../public/model/${rel}/index.json', import.meta.url).href
   const electronAPI = window.electronAPI || null
-  const safeIgnore = flag => electronAPI?.setIgnoreMouseEvents(flag)
+  // 接受可选 forward 参数
+  const safeIgnore = (flag, options) => electronAPI?.setIgnoreMouseEvents(flag, options)
 
   // —— 拖拽定位 ——  
   const x = ref(200), y = ref(200)
   const isDragging = ref(false)
   let offsetX = 0, offsetY = 0
-  // Live2D 容器引用，用于读取尺寸
   const modelContainer = ref(null)
   const imgW = ref(180), imgH = ref(120)
 
-  // —— 更新容器尺寸 ——  
-    function updateImgSize() {
+  function updateImgSize() {
     if (!modelContainer.value || !modelContainer.value.firstChild) return
     const canvas = modelContainer.value.firstChild
     imgW.value = canvas.offsetWidth
     imgH.value = canvas.offsetHeight
   }
 
+  function startDrag(e) {
+    isDragging.value = true
+    showControls()
+    offsetX = e.clientX - x.value
+    offsetY = e.clientY - y.value
 
-    function startDrag(e) {
-      isDragging.value = true
-      showControls()
-      offsetX = e.clientX - x.value
-      offsetY = e.clientY - y.value
+    function onMove(ev) {
+      if (!isDragging.value) return
+      const tentativeX = ev.clientX - offsetX
+      const center = tentativeX + imgW.value / 2
+      const showLeftCol = center > threshold
+      const showRightCol = center < window.innerWidth - threshold
+      const extraLeft = showLeftCol ? threshold : 0
+      const extraRight = showRightCol ? threshold : 0
+      const minX = extraLeft - 45
+      const maxX = window.innerWidth - imgW.value - extraRight - 23
+      x.value = Math.min(Math.max(minX, tentativeX), maxX)
 
-      function onMove(ev) {
-    if (!isDragging.value) return
-
-    /* ① 先算出“如果这一下拖过去，宠物的中心在哪里” */
-    const tentativeX = ev.clientX - offsetX          // 这一步先不截边
-    const center     = tentativeX + imgW.value / 2   // 水平中心
-
-    /* ② 判断哪边要显示按钮列 */
-    const showLeftCol  = center > threshold
-    const showRightCol = center < window.innerWidth - threshold
-
-    /* ③ 依据列的显示情况，给左右边界留安全区 */
-    const extraLeft  = showLeftCol  ? threshold : 0
-    const extraRight = showRightCol ? threshold : 0
-
-    const minX = extraLeft-70                       // 不能再往左
-    const maxX = window.innerWidth - imgW.value - extraRight -23
-
-    /* ④ 终于真正裁剪并赋值 */
-    x.value = Math.min(Math.max(minX, tentativeX), maxX)
-
-    /* —— 垂直方向直接卡住模型本身即可 —— */
-    const tentativeY = ev.clientY - offsetY
-    const minY       = 0
-    const maxY       = window.innerHeight - imgH.value -150
-    y.value = Math.min(Math.max(minY, tentativeY), maxY)
-  }
+      const tentativeY = ev.clientY - offsetY
+      const minY = 50
+      const maxY = window.innerHeight - imgH.value - 171
+      y.value = Math.min(Math.max(minY, tentativeY), maxY)
+    }
 
     function onUp() {
       isDragging.value = false
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
+
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
   }
@@ -78,67 +64,39 @@ export default function usePetLogic() {
     safeIgnore(false)
   }
   function scheduleHide() {
+    clearTimeout(hideTimer)
     hideTimer = setTimeout(() => {
       ctrlVisible.value = false
       panelVisible.value = false
-      safeIgnore(true)
+      // 由 watch 集中管理 safeIgnore
     }, 1000)
   }
 
-// —— 左右列位置计算 ——  
-const M  = 6          // 与模型最小间隙
-const CW = 40         // 按钮列宽度
-const HO = -10        // 额外水平偏移（正：向外，负：向里）
+  // —— 侧边列位置计算 ——  
+  const M = 6, CW = 40, HO = -10
+  const threshold = CW + M + Math.abs(HO)
+  const centerX = computed(() => x.value + imgW.value / 2)
+  const windowWidth = ref(window.innerWidth)
+  const nearLeft = computed(() => centerX.value < threshold)
+  const nearRight = computed(() => centerX.value > (windowWidth.value - threshold + 2))
+  const leftStyle = computed(() => {
+    const xOffset = nearLeft.value
+      ? imgW.value + M + HO
+      : -CW - M - HO
+    return { left: `${xOffset + 45}px` }
+  })
+  const rightStyle = computed(() => {
+    const xOffset = nearRight.value
+      ? -CW - M - HO
+      : imgW.value + M + HO
+    return { left: `${xOffset + 90}px` }
+  })
 
-const threshold = CW + M + Math.abs(HO)    // 56
-
-
-// 1. 模型水平中心
-const centerX = computed(() => x.value + imgW.value / 2)
-
-// 宠物中心点到边缘距离 < threshold 则算“靠边”
-//TODO: 为什么我右边不能隐藏了。。 无语
-const nearLeft  = computed(() => centerX.value < threshold)
-const windowWidth = ref(window.innerWidth)
-const updateWindowSize = () => {
-  windowWidth.value = window.innerWidth
-}
-onMounted(() => {
-  window.addEventListener('resize', updateWindowSize)
-})
-// 修改 nearRight 计算属性
-const nearRight = computed(() => {
-  // 添加 2px 容差防止计算误差
-  return centerX.value > (windowWidth.value - threshold)
-})
-
-
-
-// 4. 两列偏移
-const leftStyle = computed(() => {
-  // 如果靠左，就把左侧按钮往右推：imgW + M + HO
-  // 否则就把它收回去：-CW - M - HO
-  const xOffset = nearLeft.value
-    ? imgW.value + M + HO
-    : -CW - M - HO
-  return { left: `${xOffset + 45}px` }
-})
-
-const rightStyle = computed(() => {
-  // 如果靠右，就把右侧按钮往左推：-CW - M - HO
-  // 否则就把它放到模型右侧：imgW + M + HO
-  const xOffset = nearRight.value
-    ? -CW - M - HO
-    : imgW.value + M + HO
-  return { left: `${xOffset + 90}px` }
-})
-
-  // —— Other 面板 ——  
-  const features     = ['Fun1', 'Fun2', 'Fun3']
+  // —— 面板 ——  
+  const features = ['Fun1', 'Fun2', 'Fun3']
   const panelVisible = ref(false)
-  const panelPos     = ref({ left: '0px', top: '0px' })
-  const panelEl      = ref(null)
-
+  const panelPos = ref({ left: '0px', top: '0px' })
+  const panelEl = ref(null)
   function togglePanel() {
     panelVisible.value = !panelVisible.value
     if (panelVisible.value) nextTick(placePanel)
@@ -155,21 +113,36 @@ const rightStyle = computed(() => {
     panelPos.value = { left: px + 'px', top: py + 'px' }
   }
 
-  onMounted(() => {
-    updateImgSize()
-    window.addEventListener('resize', onResize)
-  })
-  onBeforeUnmount(() => {
-    window.removeEventListener('resize', onResize)
-  })
+  function updateWindowSize() {
+    windowWidth.value = window.innerWidth
+  }
   function onResize() {
     if (panelVisible.value) placePanel()
   }
+
+  onMounted(() => {
+    updateImgSize()
+    window.addEventListener('resize', updateWindowSize)
+    window.addEventListener('resize', onResize)
+  })
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateWindowSize)
+    window.removeEventListener('resize', onResize)
+  })
 
   // —— 退出 ——  
   function exitApp() {
     electronAPI?.exitApp?.()
   }
+
+  // —— 集中管理窗口穿透 ——  
+  watch([ctrlVisible, panelVisible], ([ctrl, panel]) => {
+    if (ctrl || panel) {
+      safeIgnore(false)
+    } else {
+      safeIgnore(true, { forward: true })
+    }
+  }, { immediate: true })
 
   return {
     x,
@@ -196,3 +169,4 @@ const rightStyle = computed(() => {
     exitApp
   }
 }
+

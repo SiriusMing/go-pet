@@ -3,6 +3,7 @@
 .pet-wrapper,
 .pet-wrapper * {
   pointer-events: auto;
+
 }
 
 .pet-wrapper {

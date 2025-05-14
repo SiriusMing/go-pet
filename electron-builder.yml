@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: test
+productName: mygoside
 directories:
   buildResources: build
 files:
@@ -11,7 +11,8 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: test
+  executableName: mygoside
+  icon: resources/icon.png
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -25,6 +26,7 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  icon: resources/icon.png
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -34,6 +36,7 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
+  icon: resources/icon.png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false

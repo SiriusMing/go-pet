@@ -262,7 +262,7 @@ const filteredAchievements = computed(() => {
 // 详情 & 关闭
 
 
-function openDetail(a) { /* TODO 跳详情 */ }
+//function openDetail(a) { /* TODO 跳详情 */ }
 
 //character
 const emit = defineEmits(['openpanel', 'close'])
