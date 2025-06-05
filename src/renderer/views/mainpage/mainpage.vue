@@ -23,6 +23,9 @@ import Fun3Panel  from '@renderer/components/function/fun3/goal_manager.vue'
 // 你的角色详情页
 import Character  from '@renderer/components/function/fun3/character/character.vue'
 
+//
+
+
 const panel = ref(null)
 
 // 统一一个打开面板的方法：
@@ -38,6 +41,7 @@ function openPanel(payload) {
 const panelMap = {
   Fun3:      Fun3Panel,
   character: Character,
+  
 }
 </script>
 

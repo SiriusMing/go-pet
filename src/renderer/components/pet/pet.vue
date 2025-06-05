@@ -55,6 +55,7 @@
       class="btn circle dress-btn"
       @click="handleDress"
     >D</button>
+          <!--聊天的-->
         <button class="btn rect chat-btn"    @click="handleChat('Chat')">Chat</button>
         <button
           v-if="!panelVisible"
@@ -149,6 +150,13 @@ function handleSwitchRole() {
 
 function handleChat() {
   speak('#waifu-tool-chat')
+  console.log(window.electronAPI);
+  if (window.electronAPI && typeof window.electronAPI.launchPython === 'function') {
+      window. electronAPI.launchPython('chat')
+    } else {
+      console.log("enter error")
+      console.error('❌ electronAPI.launchPython 不可用，请检查 preload 是否生效')
+    }
   emit('open', 'Chat')
 }
 
@@ -166,7 +174,6 @@ function handleDress() {
   // 换装：逻辑已移到 useLive2dModel.nextTexture()，会自己说话
   switchDress()
 }
-
 
 
 </script>

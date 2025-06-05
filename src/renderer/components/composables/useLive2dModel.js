@@ -7,6 +7,7 @@ import showMessage from '../utils/message.js'
 import modelList from '../utils/modelList.js'
 import tips from '../utils/tips.js'
 
+
 export function useLive2dModel(modelContainer, updateImgSize) {
   const VIEW = 290
   const DPR = window.devicePixelRatio || 1
@@ -188,11 +189,88 @@ export function useLive2dModel(modelContainer, updateImgSize) {
 
     // 首次加载时：第一个角色问候
     if (roleIdx.value === 0 && skinIdx.value === 0) {
-      speak('visibilitychange')
+      speak('#waifu-tool-begin')
     } else {
       speak()
     }
   }
+
+  /** 
+
+  function registerEventListeners() {
+    let userAction = false
+    let idleReminder = null
+    let lastHoverSelector = null
+
+    const resetIdle = () => {
+      userAction = false
+      if (idleReminder) {
+        clearTimeout(idleReminder)
+        idleReminder = null
+      }
+    }
+
+    window.addEventListener('mousemove', () => {
+      resetIdle()
+      userAction = true
+    })
+    window.addEventListener('keydown', () => {
+      resetIdle()
+      userAction = true
+    })
+
+    setInterval(() => {
+      if (!userAction && !idleReminder) {
+        idleReminder = setTimeout(() => {
+          speak()         // idle tip
+        }, 18000)
+      }
+    }, 1000)
+
+    window.addEventListener('mouseover', event => {
+      // hover over live2d canvas
+      if (event.target.closest('canvas')) {
+        speak('#waifu-tool-mouseover')
+        return
+      }
+      for (const { selector } of tips.mouseover) {
+        if (event.target.closest(selector) && selector !== lastHoverSelector) {
+          lastHoverSelector = selector
+          speak(selector)
+          return
+        }
+      }
+    })
+
+    window.addEventListener('click', event => {
+      if (event.target.closest('canvas')) {
+        speak('#waifu-tool-click')
+        return
+      }
+      for (const { selector } of tips.mouseover) {
+        if (event.target.closest(selector)) {
+          speak(selector)
+          return
+        }
+      }
+    })
+
+    window.addEventListener('resize', () => {
+      speak('visibilitychange')
+    })
+
+      // 在你的 useLive2dModel.js 或者其它入口里引入：
+window.electronAPI.onGlobalCopy(() => {
+  // 这里就是“全局复制”被按下时触发
+  speak('copy')
+}) 
+
+
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) speak('visibilitychange')
+    })
+  } */
 
   onMounted(() => loadModel(0, 0))
   onBeforeUnmount(() => {
@@ -200,6 +278,8 @@ export function useLive2dModel(modelContainer, updateImgSize) {
     live2dInst?.destroy()
     app?.destroy(true, { children: true })
   })
+
+  
 
   // 切角色
   async function nextModel() {
@@ -214,6 +294,9 @@ export function useLive2dModel(modelContainer, updateImgSize) {
     await loadModel(roleIdx.value, skinIdx.value)
     speak('#waifu-tool-switch-texture')
   }
+
+    
+
 
   return { roleIdx, skinIdx, isDragging, nextModel, nextTexture, speak }
 }

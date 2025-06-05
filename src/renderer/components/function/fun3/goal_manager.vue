@@ -41,10 +41,10 @@
     <div class="content-area">
       <!-- 左列类别 -->
       <div class="left-col">
-        <div class="cat-title pixel-box" @click="resetAll">成就浏览</div>
+        <div class="cat-title pixel-box" @click="resetAll">Achievement Browse</div>
         <div class="cat-title pixel-box sel-title" @click.stop="toggleCategoryList">
           <span class="filter-label">
-            成就类别
+            Achievement Category
             <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round">
@@ -73,7 +73,8 @@
           @click.stop="openDetail(a)"
         >
           <div class="icon-circle pixel-frame">
-            <img v-if="a.icon" :src="a.icon" />
+        <img src="./character/pic/111.jpg" alt="icon" />
+
           </div>
 
           <div class="achv-info">
@@ -81,7 +82,7 @@
             <div class="desc">{{ a.desc }}</div>
 
             <div class="progress-row">
-              <span class="label">进度</span>
+              <span class="label">Process</span>
               <div class="prog-bar bg-pixel">
                 <div
                   class="fill"
@@ -112,12 +113,12 @@
     <div v-if="showSearch" class="search-modal pixel-frame" @mousedown.stop>
       <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
       <div class="search-box pixel-box">
-        <label>输入想找的成就:</label>
+        <label>Enter the desired achievement:</label>
         <input v-model="searchTerm" class="search-input" />
       </div>
       <div class="search-buttons">
-        <button class="btn rect" @click="confirmSearch">确定</button>
-        <button class="btn rect" @click="cancelSearch">退出</button>
+        <button class="btn rect" @click="confirmSearch">Sure</button>
+        <button class="btn rect" @click="cancelSearch">Exit</button>
       </div>
     </div>
 
@@ -125,7 +126,7 @@
     <div v-if="msgModal.show" class="msg-modal pixel-frame" @mousedown.stop>
       <div class="msg-content pixel-box">{{ msgModal.text }}</div>
       <div class="msg-buttons">
-        <button class="btn rect" @click="msgModal.show = false">确定</button>
+        <button class="btn rect" @click="msgModal.show = false">Sure</button>
       </div>
     </div>
 
@@ -203,7 +204,7 @@ function openSearch() {
 function confirmSearch() {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) {
-    errorMsg.value = '请输入内容'
+    errorMsg.value = 'Please enter the content'
     return
   }
   const results = achievements.value.filter(a =>
@@ -217,7 +218,7 @@ function confirmSearch() {
   } else {
     showSearch.value = false
     errorMsg.value   = ''
-    msgModal.text    = '未找到'
+    msgModal.text    = '404 NOT FOUND'
     msgModal.show    = true
   }
 }

@@ -55,6 +55,8 @@ export default function usePetLogic() {
     window.addEventListener('mouseup', onUp)
   }
 
+  
+
   // —— 控件显隐 ——  
   const ctrlVisible = ref(false)
   let hideTimer = null

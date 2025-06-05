@@ -57,12 +57,44 @@
       </div>
 
       <!-- 中部：解锁数量 -->
-      <div class="unlock-panel pixel-frame">
-        Skins unlocked:{{ selectedCharacter.skinUnlocked }} / {{ selectedCharacter.totalSkins }}
+      <!-- 中部：解锁数量（点击触发面板） -->
+<div class="unlock-panel pixel-frame" @click="showCgPanel = true" style="cursor:pointer;">
+  CG unlocked:{{ selectedCharacter.skinUnlocked }} / {{ selectedCharacter.totalSkins }}
+</div>
+
+<!-- CG收集面板弹窗 -->
+<div v-if="showCgPanel" class="cg-collection-popup" @click.self="showCgPanel = false">
+  <div class="cg-collection-content pixel-frame">
+    <div class="cg-collection-header">
+      <span>{{ selectedCharacter?.name }}'s CG Collection</span>
+      <button class="close-cg-btn" @click="showCgPanel = false">✕</button>
+    </div>
+    <div class="cg-grid">
+      <div
+        v-for="(cg, idx) in cgList"
+        :key="idx"
+        class="cg-thumb"
+        :class="{ locked: !cg.unlocked }"
+        @click.stop="cg.unlocked && openFullCg(cg.img, idx)"
+      >
+        <img v-if="cg.unlocked" :src="cg.img" :alt="'CG '+(idx+1)">
+        <div v-else class="cg-locked">?</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- CG大图预览弹窗 -->
+<div v-if="showFullCg" class="cg-full-popup" @click.self="showFullCg = false">
+  <div class="cg-full-content pixel-frame">
+    <img :src="fullCgImg" alt="CG Full" class="cg-full-image" />
+    <button class="close-cg-btn" @click="showFullCg = false" style="position:absolute;top:12px;right:16px;">✕</button>
+  </div>
+</div>
+
 
       <!-- 底部：两个按钮 -->
-      <div class="detail-footer">
+      <div class="detail-footer"> 
         <button class="draw-btn pixel-frame" @click="drawSkin">
           Extr. (300 stars)
         </button>
@@ -73,12 +105,17 @@
     </div>
 
     <!-- 弹窗（不动） -->
-    <div v-if="showPopup" class="draw-popup">
+    <div v-if="showPopup" class="draw-popup" @click="onPopupClick">
       <div class="popup-content pixel-frame">
         <p class="popup-text">
   Congratulations!<br>
-  Get new skin:<br>{{ lastSkinName }}
+  Get new CG!:<br>{{ lastSkinName }}
 </p>
+
+ <!-- —— 新增 CG 预览框 —— -->
+      <div class="cg-container" v-if="lastSkinUrl">
+        <img :src="lastSkinUrl" alt="New CG" class="cg-image" />
+      </div>
         <button class="popup-btn" @click="closePopup">
           I know
         </button>
@@ -88,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import img1 from './pic/1.png'
 import img2 from './pic/2.png'
 import img3 from './pic/3.png'
@@ -115,11 +152,11 @@ let startX = 0, startY = 0
 let offX   = 0, offY   = 0
 
 const characters = ref([
-  { name:'Rana',   color:'#EFFEEA', image:img1, opacity:0.8, skinUnlocked:5, totalSkins:10, personality:'Mysterious', avatarImage:av1 },
-  { name:'Anon',   color:'#FFE9F2', image:img2, opacity:0.8, skinUnlocked:3, totalSkins:7,  personality:'Energetic', avatarImage:av2 },
-  { name:'Tomori', color:'#ECECE7', image:img3, opacity:0.8, skinUnlocked:7, totalSkins:10, personality:'Introverted', avatarImage:av3 },
-  { name:'Soyo',   color:'#FFF7DC', image:img4, opacity:0.8, skinUnlocked:2, totalSkins:5,  personality:'Supportive', avatarImage:av4 },
-  { name:'Taki',   color:'#ECE5FF', image:img5, opacity:0.8,skinUnlocked:4, totalSkins:8,  personality:'Blunt', avatarImage:av5 },
+  { name:'Rana',   color:'#EFFEEA', image:img1, opacity:0.8, skinUnlocked:8, totalSkins:16, personality:'Mysterious', avatarImage:av1 },
+  { name:'Anon',   color:'#FFE9F2', image:img2, opacity:0.8, skinUnlocked:7, totalSkins:16,  personality:'Energetic', avatarImage:av2 },
+  { name:'Tomori', color:'#ECECE7', image:img3, opacity:0.8, skinUnlocked:7, totalSkins:16, personality:'Introverted', avatarImage:av3 },
+  { name:'Soyo',   color:'#FFF7DC', image:img4, opacity:0.8, skinUnlocked:8, totalSkins:16,  personality:'Supportive', avatarImage:av4 },
+  { name:'Taki',   color:'#ECE5FF', image:img5, opacity:0.8,skinUnlocked:4, totalSkins:16,  personality:'Blunt', avatarImage:av5 },
 ])
 
 const selectedCharacter = ref(null)
@@ -187,13 +224,53 @@ function goBack()      { emit('openpanel','Fun3') }
 function select(c)     { selectedCharacter.value = c }
 function closeDetail() { selectedCharacter.value = null }
 function drawSkin() {
-  lastSkinName.value = `${selectedCharacter.value.name} Skin`
+  lastSkinName.value = `${selectedCharacter.value.name} New CG For you!!`
   showPopup.value    = true
 }
 function closePopup() { showPopup.value = false }
 function disableClick(){ electronAPI?.setIgnoreMouseEvents(false) }
 function enableClick() { electronAPI?.setIgnoreMouseEvents(true) }
+
+const showCgPanel = ref(false)
+const showFullCg = ref(false)
+const fullCgImg = ref('')
+
+// 假数据示例
+const cgList = computed(() => {
+  if (!selectedCharacter.value) return []
+  const total = selectedCharacter.value.totalSkins
+  const unlocked = selectedCharacter.value.skinUnlocked
+  return Array.from({ length: total }, (_, i) => ({
+    img: `https://i.bandori.party/u/c/art/a/5088Hina-Hikawa-Power-Kaleidoscopic-Brilliance-WXrTt3.png`,
+    unlocked: i < unlocked,
+  }))
+})
+
+function openFullCg(img, idx) {
+  fullCgImg.value = img
+  showFullCg.value = true
+}
 </script>
+
+<script>
+export default {
+  data() {
+    return {
+      showPopup: true,
+      lastSkinName: 'Anon CG!!!',
+      // 点击弹窗时请求到的 CG 图片 URL
+      lastSkinUrl: 'https://i.bandori.party/u/c/art/a/5009Anon-Chihaya-Happy-Wake-Up-Yawn-Time-wTaGpY.png'
+    }
+  },
+  methods: {
+    closePopup() {
+      this.showPopup = false
+      // 如果你还想在这里做别的逻辑，就继续写
+    }
+  }
+}
+</script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -294,6 +371,8 @@ function enableClick() { electronAPI?.setIgnoreMouseEvents(true) }
   margin: 12px 0;
 }
 
+
+
 /* 底部：按钮行 */
 .detail-footer {
   display: flex;
@@ -350,19 +429,56 @@ function enableClick() { electronAPI?.setIgnoreMouseEvents(true) }
   50% { transform: translate(-50%, -48%); }
 }
 
+/* 弹窗内容整体 */
 .popup-content {
-  background: #fad5c3;
-  border: 3px solid #000;
-  box-shadow: 
-    4px 4px 0 #000,
-    8px 8px 16px rgba(0,0,0,0.1); /* 柔和外阴影 */
-  border-radius: 12px;
+  background: #fff0e6;
+  border: 4px solid #000;
+  border-radius: 16px;
   padding: 20px;
-  width: 200px;
+  width: 300px;          /* 根据需要微调 */
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
   text-align: center;
-  font-family: 'Press Start 2P', monospace;
-  position: relative;
+}
+
+/* 文本 */
+.popup-text {
+  margin: 0 0 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #333;
+}
+
+/* —— 新增：CG 预览 —— */
+.cg-container {
+  width: 200px;
+  height: 150px;
+  margin: 0 auto 16px;     /* 顶部和按钮之间留一点空 */
+  border: 2px solid #000;
+  border-radius: 12px;
   overflow: hidden;
+  background: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cg-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* 按钮 */
+.popup-btn {
+  background: #ffb380;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 0.6em 1.2em;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+.popup-btn:hover {
+  background: #ffa260;
 }
 
 /* 添加装饰性像素边框 */
@@ -378,28 +494,7 @@ function enableClick() { electronAPI?.setIgnoreMouseEvents(true) }
   pointer-events: none;
 }
 
-.popup-text {
-  font-size: 9px;
-  margin-bottom: 16px;
-  line-height: 1.6;
-  text-shadow: 1px 1px 0 rgba(255,255,255,0.5); /* 文字描边 */
-  color: #5a3921; 
-}
 
-.popup-btn {
-  background: #ff9a76;
-  color: #000;
-  border: 2px solid #000;
-  box-shadow: 
-    2px 2px 0 #000; 
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 9px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
 
 .popup-btn:hover {
   filter: brightness(1.1);
@@ -435,6 +530,124 @@ function enableClick() { electronAPI?.setIgnoreMouseEvents(true) }
   opacity: 0.5;
   pointer-events: none;
 }
+
+
+/** CG 部分的内容 */
+
+.cg-collection-popup {
+  position: fixed;
+  z-index: 200;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cg-collection-content {
+  background: #fff9ef;
+  border: 4px solid #000;
+  border-radius: 14px;
+  padding: 22px 28px 22px 28px;
+  min-width: 340px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.19);
+  animation: float .7s cubic-bezier(.4,2,.6,.8);
+  position:relative;
+}
+.cg-collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #bf5a11;
+  text-shadow:1px 1px 0 #fff;
+}
+.close-cg-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: #a22;
+  cursor: pointer;
+}
+.cg-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.cg-thumb {
+  width: 58px; height: 58px;
+  background: #ffe4d2;
+  border: 2px solid #000;
+  border-radius: 7px;
+  display: flex;
+  align-items: center; justify-content: center;
+  box-shadow: 1px 1px 0 #c9b68a;
+  overflow: hidden;
+  position: relative;
+  font-size: 20px;
+  cursor: pointer;
+  transition: filter 0.15s, box-shadow 0.15s;
+}
+.cg-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .2s;
+}
+.cg-thumb.locked {
+  filter: grayscale(0.8) brightness(1.3) blur(1px);
+  background: #f8f8f8;
+  color: #bbb;
+  cursor: not-allowed;
+}
+.cg-locked {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: #ddd;
+  font-family: 'Press Start 2P', monospace;
+  background: repeating-linear-gradient(45deg, #ffe4d2, #fff2e6 8px, #ffe4d2 12px);
+}
+
+.cg-thumb:not(.locked):hover img {
+  transform: scale(1.12);
+  box-shadow:0 0 4px #eacb93;
+}
+
+.cg-full-popup {
+  position: fixed;
+  z-index: 210;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cg-full-content {
+  background: #fff6ee;
+  border: 5px solid #000;
+  border-radius: 18px;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.21);
+  position: relative;
+  padding: 30px 24px;
+  min-width: 350px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cg-full-image {
+  max-width: 360px;
+  max-height: 380px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 #e8cfa7;
+  border: 2.5px solid #000;
+  background: #fff;
+}
+
+
+
 </style>
 
 

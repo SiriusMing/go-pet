@@ -1,10 +1,11 @@
 {
-  "name": "test",
-  "version": "1.0.0",
-  "description": "An Electron application with Vue",
+  "name": "Mygoside",
+  "version": "1.2.2",
+  "description": "An App that can bring the feeling of companionship",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "license": "MIT",
+  "author": "https://github.com/SiriusMing",
+  "homepage": "http://localhost:5173/",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -19,6 +20,7 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
+    "electron": "35.3.0",
     "electron-updater": "^6.3.9",
     "element-plus": "^2.9.8",
     "live2d-widget": "^3.1.4",
@@ -34,7 +36,6 @@
     "@types/node": "^22.14.1",
     "@types/vue": "^1.0.31",
     "@vitejs/plugin-vue": "^5.2.3",
-    "electron": "^35.2.0",
     "electron-builder": "^25.1.8",
     "electron-vite": "^3.1.0",
     "eslint": "^9.24.0",
