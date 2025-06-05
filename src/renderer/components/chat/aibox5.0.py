@@ -42,9 +42,6 @@ tk.Label(title,text="❤ Mygo!!!!! Chat",font=("Courier New",12,"bold"),
          bg="#FFCCBA").pack(side="left",padx=6)
 tk.Button(title,text="✕",command=root.destroy,
           font=("Courier New",12,"bold"),bg="#FFCCBA",bd=4).pack(side="right",padx=6)
-def drag_start(e): root.x0,root.y0=e.x,e.y
-def drag_move(e):  root.geometry(f"+{root.winfo_pointerx()-root.x0}+{root.winfo_pointery()-root.y0}")
-title.bind("<ButtonPress-1>",drag_start); title.bind("<B1-Motion>",drag_move)
 
 # ── 聊天区
 chat = tk.Frame(base,bg="#FFF5EC"); chat.pack(fill="both",expand=True,padx=10,pady=10)
@@ -56,35 +53,32 @@ canvas.bind("<Configure>",lambda e: canvas.itemconfig(win,width=e.width))
 inner.bind("<Configure>",lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
 # ── 输入
+# ── 输入
 bottom = tk.Frame(base,bg="#FFC799",bd=4); bottom.pack(fill="x")
 entry  = tk.Entry(bottom,font=("Courier New",12),bg="#F4F4F4",bd=4)
 entry.pack(side="left",fill="x",expand=True,padx=6,pady=6)
+'''''
 arr_ph = ImageTk.PhotoImage(Image.open("./photo/arrow.png").resize((24,24)))
 tk.Button(bottom,image=arr_ph,bg="#FFE5B0",bd=4,command=lambda:send_msg()).pack(side="left",padx=6)
+'''''
 
 # ========= 头像 =========
 def load_avatar(path: str, size=(45, 45)) -> ImageTk.PhotoImage:
-    """
-    尝试从 `path` 读取头像；若失败则生成一个简易占位方块。
-    """
     try:
         img = Image.open(path).resize(size)
     except Exception:
-        # 占位：青色方块 + 黑边
         img = Image.new("RGB", size, "#6cf")
         d = ImageDraw.Draw(img)
         d.rectangle([2, 2, size[0]-3, size[1]-3], outline="#000", width=3)
 
-    # 圆形遮罩 → 完美圆头像
     mask = Image.new("L", size, 0)
     ImageDraw.Draw(mask).ellipse((0, 0, *size), fill=255)
     return ImageTk.PhotoImage(Image.composite(img, Image.new("RGB", size, "#FFF5EC"), mask))
 
+bot_av  = load_avatar(f"./photo/{persona_key}.png")
+user_av = load_avatar("./photo/mxr.png")
 
 # 机器人 / 用户分别读取各自的图片文件
-bot_av  = load_avatar(f"./photo/{persona_key}.png")   # e.g. "./photo/Rana_Kaname.png"
-user_av = load_avatar("./photo/mxr.png")             # 你自己的用户头像文件
-
 def bubble(parent, text, fill, is_bot):
     PAD = 10      # 内边距
     R = 18        # 圆角半径
@@ -162,9 +156,6 @@ def bubble(parent, text, fill, is_bot):
     c.pack()
     return c
 
-
-
-
 # ========= 显示一条消息 =========
 def show(sender,msg):
     row = tk.Frame(inner,bg="#FFF5EC")
@@ -211,4 +202,4 @@ def send_msg(event=None):
 entry.bind("<Return>",send_msg)
 canvas.bind_all("<MouseWheel>",lambda e: canvas.yview_scroll(int(-e.delta/120),"units"))
 
-root.mainloop()
+root.mainloop() 

@@ -107,7 +107,7 @@ const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 
 // 这里你应该写你的 chat.py 的路径，不是 .vue 文件
-const script = path.resolve(__dirname, '../../src/renderer/components/chat/1.py') // 改成你的实际脚本名！
+const script = path.resolve(__dirname, '../../src/renderer/components/chat/aibox5.0.py') // 改成你的实际脚本名！
 
 ipcMain.on('launch-python', (_e, feature) => {
   if (feature !== 'chat') return   // 这里只处理 Chat
