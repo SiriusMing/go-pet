@@ -136,13 +136,13 @@ function handleFeature(feature) {
 
 function handleInfo() {
   speak('#waifu-tool-info')
-  emit('open', 'Info')
+  emit('open', { type: 'ProfilePanel' })
 }
-
 function handleSettings() {
   speak('#waifu-tool-settings')
-  emit('open', 'Settings')
+  emit('open', { type: 'SettingsPanel' })
 }
+
 
 function handleSwitchRole() {
   switchRole()
@@ -166,9 +166,17 @@ function handleOther() {
 }
 
 async function handleExit() {
-  speak('#waifu-tool-quit')
-  setTimeout(() => exitApp(), 4000)
+  // 语音播报
+  speak('#waifu-tool-quit');
+  
+  // 延时退出应用，给语音播报留时间
+  setTimeout(() => {
+    // 调用写入角色到文件的操作，覆盖为 "Takamatsu_Tomori"
+    window.electronAPI.writeCharacter('Takamatsu_Tomori');
+    exitApp();
+  }, 4000);
 }
+
 
 function handleDress() {
   // 换装：逻辑已移到 useLive2dModel.nextTexture()，会自己说话

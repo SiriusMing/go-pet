@@ -123,8 +123,20 @@ ipcMain.on('launch-python', (_e, feature) => {
   
   // 跨平台启动
   spawn(pythonCmd, [script], {
-    detached: true,
+    detached: false,
     stdio: 'ignore'
   }).unref()
 })
+
+ipcMain.handle('write-character', async (event, characterName) => {
+  // 使用绝对路径，确保文件能够正确访问
+  const filePath = path.join(__dirname, '../../src/renderer/common/character.txt');
+  
+  try {
+    fs.writeFileSync(filePath, characterName, 'utf8'); // 同步写入文件
+    console.log('Character written to file:', characterName);
+  } catch (error) {
+    console.error('Failed to write character:', error);
+  }
+});
 

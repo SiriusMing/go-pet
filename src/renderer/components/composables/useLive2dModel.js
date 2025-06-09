@@ -91,6 +91,7 @@ export function useLive2dModel(modelContainer, updateImgSize) {
     )
   }
 
+
   async function loadModel(modelId, textureId) {
     // 1) 处理索引越界
     if (modelId >= modelList.length) modelId %= modelList.length
@@ -177,6 +178,7 @@ export function useLive2dModel(modelContainer, updateImgSize) {
       updateImgSize()
       playRandom()
       autoTimer = setInterval(() => playRandom(false), 10000)
+      setInterval(() => playRandom(true), 5000)
     }
     if (live2dInst.internalModel.ready) start()
     else live2dInst.once('ready', start)
@@ -195,84 +197,9 @@ export function useLive2dModel(modelContainer, updateImgSize) {
     }
   }
 
-  /** 
-
-  function registerEventListeners() {
-    let userAction = false
-    let idleReminder = null
-    let lastHoverSelector = null
-
-    const resetIdle = () => {
-      userAction = false
-      if (idleReminder) {
-        clearTimeout(idleReminder)
-        idleReminder = null
-      }
-    }
-
-    window.addEventListener('mousemove', () => {
-      resetIdle()
-      userAction = true
-    })
-    window.addEventListener('keydown', () => {
-      resetIdle()
-      userAction = true
-    })
-
-    setInterval(() => {
-      if (!userAction && !idleReminder) {
-        idleReminder = setTimeout(() => {
-          speak()         // idle tip
-        }, 18000)
-      }
-    }, 1000)
-
-    window.addEventListener('mouseover', event => {
-      // hover over live2d canvas
-      if (event.target.closest('canvas')) {
-        speak('#waifu-tool-mouseover')
-        return
-      }
-      for (const { selector } of tips.mouseover) {
-        if (event.target.closest(selector) && selector !== lastHoverSelector) {
-          lastHoverSelector = selector
-          speak(selector)
-          return
-        }
-      }
-    })
-
-    window.addEventListener('click', event => {
-      if (event.target.closest('canvas')) {
-        speak('#waifu-tool-click')
-        return
-      }
-      for (const { selector } of tips.mouseover) {
-        if (event.target.closest(selector)) {
-          speak(selector)
-          return
-        }
-      }
-    })
-
-    window.addEventListener('resize', () => {
-      speak('visibilitychange')
-    })
-
-      // 在你的 useLive2dModel.js 或者其它入口里引入：
-window.electronAPI.onGlobalCopy(() => {
-  // 这里就是“全局复制”被按下时触发
-  speak('copy')
-}) 
-
-
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) speak('visibilitychange')
-    })
-  } */
-
-  onMounted(() => loadModel(0, 0))
+  onMounted(() => { loadModel(0, 0)
+  })
+  
   onBeforeUnmount(() => {
     clearInterval(autoTimer)
     live2dInst?.destroy()
@@ -283,11 +210,26 @@ window.electronAPI.onGlobalCopy(() => {
 
   // 切角色
   async function nextModel() {
-    roleIdx.value = (roleIdx.value + 1) % modelList.length
-    skinIdx.value = 0
-    await loadModel(roleIdx.value, 0)
-    speak('#waifu-tool-switch-model')
-  }
+  // 定义角色列表
+  const person_list = ["Takamatsu_Tomori", "Anon_Chihaya", "Rana_Kaname", "Soyo_Nagasaki", "Taki_Shiina"];
+  
+  // 更新角色索引
+  roleIdx.value = (roleIdx.value + 1) % person_list.length;
+  skinIdx.value = 0;
+  
+  // 加载新角色的模型
+  await loadModel(roleIdx.value, skinIdx.value);
+  
+  // 获取当前角色名称
+  const currentCharacter = person_list[roleIdx.value];
+  
+  // 通过Electron API 保存角色名称到文件
+  await window.electronAPI.writeCharacter(currentCharacter);  // 确保这个方法存在于主进程并正常工作
+
+  // 播放语音（可选）
+  speak('#waifu-tool-switch-model');
+}
+
   // 换贴图
   async function nextTexture() {
     skinIdx.value = (skinIdx.value + 1) % modelList[roleIdx.value].length
@@ -300,6 +242,8 @@ window.electronAPI.onGlobalCopy(() => {
 
   return { roleIdx, skinIdx, isDragging, nextModel, nextTexture, speak }
 }
+
+
 
 
 

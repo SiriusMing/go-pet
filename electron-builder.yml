@@ -3,13 +3,26 @@ productName: mygoside
 directories:
   buildResources: build
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - 'src/**'        # ✅ 包含开发代码
+  - 'resources/**'  # ✅ 包含静态资源
+  - 'out/**'
+
+  #- '!src/**'         # 排除 src 文件夹中的所有文件
+  - '!**/.vscode/*'   # 排除 .vscode 文件夹
+  - '!electron.vite.config.{js,ts,mjs,cjs}'  # 排除构建配置文件
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'  # 排除其他不需要的文件
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'  # 排除环境变量和锁定文件
+
 asarUnpack:
-  - resources/**
+  - 'resources/**'   # 确保 resources 文件夹中的文件不会被压缩到 asar 中
+  - 'src/**'
+
+extraResources:
+  - from: resources/chat
+    to: chat
+    
+  - from: resources/chat/dist/aibox5.0.exe
+    to: aibox5.0.exe
 win:
   executableName: mygoside
   icon: resources/icon.png

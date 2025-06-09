@@ -6,5 +6,8 @@ console.log("[PRELOAD] My custom preload loaded!!!")
 contextBridge.exposeInMainWorld('electronAPI', {
   launchPython: (feature) => ipcRenderer.send('launch-python', feature),
   exitApp: () => ipcRenderer.send('exit-app'),
-  setIgnoreMouseEvents: (ignore) => ipcRenderer.send('set-ignore-mouse-events', ignore)
+  setIgnoreMouseEvents: (ignore) => ipcRenderer.send('set-ignore-mouse-events', ignore),
+  readCharacter: () => ipcRenderer.invoke('read-character'),
+  writeCharacter: (characterName) => ipcRenderer.invoke('write-character', characterName)
+
 })
