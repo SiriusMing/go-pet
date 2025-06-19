@@ -1,27 +1,26 @@
-// File: pet.vue
 <template>
-  <!-- 整个宠物容器，设置为 relative 以便气泡定位 -->
-  <!-- 整个宠物容器：宽高随模型大小变化 -->
   <div
     class="pet-wrapper"
-    :class="'role-'+(roleIdx+1)"
+    :class="'role-' + (roleIdx + 1)"
     :style="{
-      left: x + 'px',
-      top:  y + 'px',
-      position: 'absolute',
-      width:  imgW + 'px',
-      height: imgH + 'px'
+      left:  x + 'px',
+      top:   y + 'px',
+      width: imgW + 'px',
+      height:imgH + 'px',
+      position:'absolute'
     }"
     @mouseenter="showControls"
     @mouseleave="scheduleHide"
   >
     <!-- Live2D 容器 -->
-    <div ref="modelContainer" class="pet-model" 
+    <div
+      ref="modelContainer"
+      class="pet-model"
       @mousedown.prevent="handleStartDrag"
-    @mouseup="handleEndDrag"
+      @mouseup="handleEndDrag"
     />
 
-    <!-- 对话气泡：相对于角色容器定位，置于模型下方 -->
+    <!-- 对话气泡 -->
     <div id="waifu-tips" class="waifu-tips"></div>
 
     <!-- 左侧按钮 -->
@@ -33,10 +32,14 @@
         @mouseenter="showControls"
         @mouseleave="scheduleHide"
       >
-        <button class="btn icon info-btn"     @click="handleInfo('Info')">👤</button>
-        <button class="btn icon settings-btn" @click="handleSettings('Settings')">⚙</button>
-        <button id="waifu-tool-switch-model" class="btn circle switch-btn" @click="handleSwitchRole">S</button>
-        <button id="waifu-tool-quit" class="btn circle exit-btn"   @click="handleExit">E</button>
+        <button class="btn icon info-btn"     @click="handleInfo">👤</button>
+        <button class="btn icon settings-btn" @click="handleSettings">⚙</button>
+        <button id="waifu-tool-switch-model"
+                class="btn circle switch-btn"
+                @click="handleSwitchRole">S</button>
+        <button id="waifu-tool-quit"
+                class="btn circle exit-btn"
+                @click="handleExit">E</button>
       </div>
     </transition>
 
@@ -49,19 +52,14 @@
         @mouseenter="showControls"
         @mouseleave="scheduleHide"
       >
-        <!-- 换装按钮：先换装再触发 speak() -->
-    <button
-      id="waifu-tool-switch-texture"
-      class="btn circle dress-btn"
-      @click="handleDress"
-    >D</button>
-          <!--聊天的-->
-        <button class="btn rect chat-btn"    @click="handleChat('Chat')">Chat</button>
-        <button
-          v-if="!panelVisible"
-          class="btn rect other-btn"
-          @click.stop="handleOther"
-        >Other</button>
+        <button id="waifu-tool-switch-texture"
+                class="btn circle dress-btn"
+                @click="handleDress">D</button>
+        <button class="btn rect chat-btn"
+                @click="handleChat">Chat</button>
+        <button v-if="!panelVisible"
+                class="btn rect other-btn"
+                @click.stop="handleOther">Other</button>
       </div>
     </transition>
 
@@ -88,33 +86,33 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue'
-import usePetLogic from './petLogic.js'
+import usePetLogic       from './petLogic.js'
 import { useLive2dModel } from '../composables/useLive2dModel.js'
 
-
-// 基础控制/拖拽逻辑
-const petApi = usePetLogic()
+/* 基础拖拽 & 控制面板 */
+const pet = usePetLogic()
 const {
-  x, y,
-  imgW, imgH,
+  x, y, imgW, imgH,
   ctrlVisible, nearLeft, nearRight,
   leftStyle, rightStyle,
   showControls, scheduleHide, startDrag,
   togglePanel, exitApp,
   panelVisible, panelPos, panelEl, features,
   updateImgSize, modelContainer
-} = petApi
+} = pet
 
-// Live2D 组合函数：解构出 roleIdx 以便切换色调
+/* Live2D & 说话 & Chat 自动动作 */
 const {
   roleIdx,
   nextModel: switchRole,
   nextTexture: switchDress,
   isDragging,
-  speak
+  speak,
+  startChatAuto,
+  stopChatAuto
 } = useLive2dModel(modelContainer, updateImgSize)
 
-//拖拽
+/* 拖拽辅助 */
 function handleStartDrag(e) {
   isDragging.value = true
   startDrag(e)
@@ -123,67 +121,60 @@ function handleEndDrag() {
   isDragging.value = false
   scheduleHide()
 }
-
 onMounted(() => window.addEventListener('mouseup', handleEndDrag))
 onBeforeUnmount(() => window.removeEventListener('mouseup', handleEndDrag))
 
-//我会说话了
-const emit = defineEmits(['open'])
-function handleFeature(feature) {
-  speak()
-  emit('open', feature)
+/* 切换前先停 Chat 循环 */
+function stopChatBeforeJump() {
+  stopChatAuto()
 }
 
+/* 事件分发 */
+const emit = defineEmits(['open'])
+function handleFeature(f) {
+  stopChatBeforeJump()
+  speak()
+  emit('open', f)
+}
 function handleInfo() {
+  stopChatBeforeJump()
   speak('#waifu-tool-info')
   emit('open', { type: 'ProfilePanel' })
 }
 function handleSettings() {
+  stopChatBeforeJump()
   speak('#waifu-tool-settings')
   emit('open', { type: 'SettingsPanel' })
 }
-
-
 function handleSwitchRole() {
+  stopChatBeforeJump()
   switchRole()
 }
-
+function handleDress() {
+  stopChatBeforeJump()
+  switchDress()
+}
 function handleChat() {
+  stopChatBeforeJump()
   speak('#waifu-tool-chat')
-  console.log(window.electronAPI);
-  if (window.electronAPI && typeof window.electronAPI.launchPython === 'function') {
-      window. electronAPI.launchPython('chat')
-    } else {
-      console.log("enter error")
-      console.error('❌ electronAPI.launchPython 不可用，请检查 preload 是否生效')
-    }
+  startChatAuto()
+  console.log('▶️ startChatAuto')
+  window.electronAPI?.launchPython?.('chat')
   emit('open', 'Chat')
 }
-
 function handleOther() {
+  stopChatBeforeJump()
   speak('#waifu-tool-fun')
   togglePanel()
 }
-
 async function handleExit() {
-  // 语音播报
-  speak('#waifu-tool-quit');
-  
-  // 延时退出应用，给语音播报留时间
+  stopChatBeforeJump()
+  speak('#waifu-tool-quit')
   setTimeout(() => {
-    // 调用写入角色到文件的操作，覆盖为 "Takamatsu_Tomori"
-    window.electronAPI.writeCharacter('Takamatsu_Tomori');
-    exitApp();
-  }, 4000);
+    window.electronAPI?.writeCharacter?.('Takamatsu_Tomori')
+    exitApp()
+  }, 4000)
 }
-
-
-function handleDress() {
-  // 换装：逻辑已移到 useLive2dModel.nextTexture()，会自己说话
-  switchDress()
-}
-
-
 </script>
 
 <style scoped src="./petStyle.css" />

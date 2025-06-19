@@ -199,7 +199,6 @@ def ask_api(u):
     return txt
 
 def tts_async(txt): threading.Thread(target=lambda: text2audio(txt,VCN.get(persona_key,"")),daemon=True).start()
-def clean_tts(s):  return re.sub(r'\*.*?\*','',s).replace("\n"," ")
 
 def send_msg(event=None):
     user = entry.get().strip(); entry.delete(0,"end")
@@ -423,7 +422,6 @@ def ask_api(u):
     return txt
 
 def tts_async(txt): threading.Thread(target=lambda: text2audio(txt, VCN.get(persona_key, "")), daemon=True).start()
-def clean_tts(s):  return re.sub(r'\*.*?\*', '', s).replace("\n", " ")
 
 def send_msg(event=None):
     user = entry.get().strip()
@@ -515,9 +513,9 @@ PERSONAS = {
 }
 
 VCN = {
-    "Rana_Kaname":      "x4_enus_catherine_profnews",
-    "Taki_Shiina":      "x4_enus_catherine_profnews",
-    "Normal mode":      "x4_enus_catherine_profnews",
+    "Rana_Kaname":      "x4_enus_luna_assist",
+    "Taki_Shiina":      "x4_enus_luna_assist",
+    "Normal mode":      "x4_enus_luna_assist",
     "Anon_Chihaya":     "x4_enuk_amanda_education",
     "Soyo_Nagasaki":    "x4_enuk_amanda_education",
     "Takamatsu_Tomori": "x4_enuk_amanda_education"
@@ -657,7 +655,7 @@ def ask_api(u):
         return "⚠️ Auth missing"
     try:
         r = requests.post(API_URL, files={"prompt": (None, f"{PERSONAS[persona_key]}\n{u}")},
-                          headers={"Authorization": f"Bearer {TOKEN}"}, timeout=120)
+                          headers={"Authorization": f"Bearer {TOKEN}"}, timeout=1200)
         r.raise_for_status()
         txt = r.json().get("content", "")
     except Exception as e:
@@ -666,7 +664,8 @@ def ask_api(u):
     emo = emo_match.group(1).lower() if emo_match else random.choice(DF_EMO)
     return txt
 
-def tts_async(txt): threading.Thread(target=lambda: text2audio(txt,'x4_enus_ryan_assist'), daemon=True).start()
+def tts_async(txt): threading.Thread(target=lambda: text2audio(txt,'x4_enus_luna_assist'), daemon=True).start()
+def tts_async2(txt): text2audio(txt,'x4_enus_luna_assist')
 def clean_tts(s):  return re.sub(r'\*.*?\*', '', s).replace("\n", " ")
 
 def send_msg(event=None):
@@ -682,7 +681,7 @@ def send_msg(event=None):
         pass
     show("bot", bot)
     tts_async(clean_tts(bot))
-    remove()
+    #remove()
 
 arr_ph = ImageTk.PhotoImage(Image.open(ARROW_IMG_PATH).resize((24, 24)))
 send_btn = tk.Button(bottom, image=arr_ph, bg="#FFE580", bd=4, command=send_msg)

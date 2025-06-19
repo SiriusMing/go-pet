@@ -436,6 +436,7 @@ def send_msg(event=None):
         pass
     show("bot", bot)
     tts_async(clean_tts(bot))
+    remove()
 
 arr_ph = ImageTk.PhotoImage(Image.open(ARROW_IMG_PATH).resize((24, 24)))
 send_btn = tk.Button(bottom, image=arr_ph, bg="#FFE580", bd=4, command=send_msg)
