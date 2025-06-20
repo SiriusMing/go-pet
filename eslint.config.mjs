@@ -1,30 +1,3 @@
-import eslintConfig from '@electron-toolkit/eslint-config'
-import eslintConfigPrettier from '@electron-toolkit/eslint-config-prettier'
-import eslintPluginVue from 'eslint-plugin-vue'
-import vueParser from 'vue-eslint-parser'
-
-export default [
-  { ignores: ['**/node_modules', '**/dist', '**/out'] },
-  eslintConfig,
-  ...eslintPluginVue.configs['flat/recommended'],
-  {
-    files: ['**/*.vue'],
-    languageOptions: {
-      parser: vueParser,
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true
-        },
-        extraFileExtensions: ['.vue']
-      }
-    }
-  },
-  {
-    files: ['**/*.{js,jsx,vue}'],
-    rules: {
-      'vue/require-default-prop': 'off',
-      'vue/multi-word-component-names': 'off'
-    }
-  },
-  eslintConfigPrettier
-]
+version https://git-lfs.github.com/spec/v1
+oid sha256:0978882a1885b6df95a73e7a14354a03fdd8cde9ee67da568fe1bdb8a304fe01
+size 782
